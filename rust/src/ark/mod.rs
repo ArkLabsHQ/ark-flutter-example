@@ -91,10 +91,13 @@ pub async fn setup_client(
     let esplora = EsploraClient::new(esplora.as_str())?;
     tracing::info!("Checking esplora connection");
 
-    esplora.check_connection().await?;
+    if let Err(err) = esplora.check_connection().await {
+        tracing::error!("Failed connecting to esplora {:?}", err);
+    }
 
     tracing::info!("Connecting to Ark");
-    let client = OfflineClient::new(
+
+    match OfflineClient::new(
         "alice".to_string(),
         kp,
         Arc::new(esplora),
@@ -103,15 +106,18 @@ pub async fn setup_client(
     )
     .connect()
     .await
-    .map_err(|err| anyhow!(err))?;
+    {
+        Err(err) => {
+            tracing::error!("Failed connecting to ark client {:?}", err);
+            bail!(err);
+        }
+        Ok(client) => {
+            let info = client.server_info.clone();
 
-    let info = client.server_info.clone();
-
-    ARK_CLIENT.set(RwLock::new(Arc::new(client)));
-
-    tracing::info!(server_pk = ?info.pk, "Connected to server");
-
-    Ok(info.pk.to_string())
+            ARK_CLIENT.set(RwLock::new(Arc::new(client)));
+            Ok(info.pk.to_string())
+        }
+    }
 }
 
 pub(crate) async fn wallet_exists(data_dir: String) -> Result<bool> {
