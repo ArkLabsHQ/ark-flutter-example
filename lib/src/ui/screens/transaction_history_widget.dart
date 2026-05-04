@@ -113,10 +113,22 @@ class TransactionHistoryWidgetState extends State<TransactionHistoryWidget> {
         false,
         tx.confirmedAt,
       ),
-      round: (tx) => _buildTransactionDetailsItem("Round Transaction", tx.txid,
-          tx.createdAt, tx.amountSats, true, null),
-      redeem: (tx) => _buildTransactionDetailsItem("Redeem Transaction",
-          tx.txid, tx.createdAt, tx.amountSats, tx.isSettled, null),
+      commitment: (tx) => _buildTransactionDetailsItem(
+          "Commitment Transaction",
+          tx.txid,
+          tx.createdAt,
+          tx.amountSats,
+          true,
+          null),
+      redeem: (tx) => _buildTransactionDetailsItem(
+          "Redeem Transaction",
+          tx.txid,
+          tx.createdAt ?? 0,
+          tx.amountSats.toInt(),
+          tx.isSettled,
+          null),
+      ark: (tx) => _buildTransactionDetailsItem("Ark Transaction", tx.txid,
+          tx.createdAt, tx.amountSats, tx.isSettled, null),
     );
   }
 
