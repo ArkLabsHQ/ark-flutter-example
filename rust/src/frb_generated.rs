@@ -710,10 +710,12 @@ impl SseDecode for crate::api::ark_api::OffchainBalance {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_pendingSats = <u64>::sse_decode(deserializer);
         let mut var_confirmedSats = <u64>::sse_decode(deserializer);
+        let mut var_recoverableSats = <u64>::sse_decode(deserializer);
         let mut var_totalSats = <u64>::sse_decode(deserializer);
         return crate::api::ark_api::OffchainBalance {
             pending_sats: var_pendingSats,
             confirmed_sats: var_confirmedSats,
+            recoverable_sats: var_recoverableSats,
             total_sats: var_totalSats,
         };
     }
@@ -749,7 +751,7 @@ impl SseDecode for crate::api::ark_api::Transaction {
                 let mut var_txid = <String>::sse_decode(deserializer);
                 let mut var_amountSats = <i64>::sse_decode(deserializer);
                 let mut var_createdAt = <i64>::sse_decode(deserializer);
-                return crate::api::ark_api::Transaction::Round {
+                return crate::api::ark_api::Transaction::Commitment {
                     txid: var_txid,
                     amount_sats: var_amountSats,
                     created_at: var_createdAt,
@@ -757,10 +759,22 @@ impl SseDecode for crate::api::ark_api::Transaction {
             }
             2 => {
                 let mut var_txid = <String>::sse_decode(deserializer);
+                let mut var_amountSats = <u64>::sse_decode(deserializer);
+                let mut var_isSettled = <bool>::sse_decode(deserializer);
+                let mut var_createdAt = <Option<i64>>::sse_decode(deserializer);
+                return crate::api::ark_api::Transaction::Redeem {
+                    txid: var_txid,
+                    amount_sats: var_amountSats,
+                    is_settled: var_isSettled,
+                    created_at: var_createdAt,
+                };
+            }
+            3 => {
+                let mut var_txid = <String>::sse_decode(deserializer);
                 let mut var_amountSats = <i64>::sse_decode(deserializer);
                 let mut var_isSettled = <bool>::sse_decode(deserializer);
                 let mut var_createdAt = <i64>::sse_decode(deserializer);
-                return crate::api::ark_api::Transaction::Redeem {
+                return crate::api::ark_api::Transaction::Ark {
                     txid: var_txid,
                     amount_sats: var_amountSats,
                     is_settled: var_isSettled,
@@ -922,6 +936,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::ark_api::OffchainBalance {
         [
             self.pending_sats.into_into_dart().into_dart(),
             self.confirmed_sats.into_into_dart().into_dart(),
+            self.recoverable_sats.into_into_dart().into_dart(),
             self.total_sats.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -953,7 +968,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::ark_api::Transaction {
                 confirmed_at.into_into_dart().into_dart(),
             ]
             .into_dart(),
-            crate::api::ark_api::Transaction::Round {
+            crate::api::ark_api::Transaction::Commitment {
                 txid,
                 amount_sats,
                 created_at,
@@ -971,6 +986,19 @@ impl flutter_rust_bridge::IntoDart for crate::api::ark_api::Transaction {
                 created_at,
             } => [
                 2.into_dart(),
+                txid.into_into_dart().into_dart(),
+                amount_sats.into_into_dart().into_dart(),
+                is_settled.into_into_dart().into_dart(),
+                created_at.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::ark_api::Transaction::Ark {
+                txid,
+                amount_sats,
+                is_settled,
+                created_at,
+            } => [
+                3.into_dart(),
                 txid.into_into_dart().into_dart(),
                 amount_sats.into_into_dart().into_dart(),
                 is_settled.into_into_dart().into_dart(),
@@ -1094,6 +1122,7 @@ impl SseEncode for crate::api::ark_api::OffchainBalance {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <u64>::sse_encode(self.pending_sats, serializer);
         <u64>::sse_encode(self.confirmed_sats, serializer);
+        <u64>::sse_encode(self.recoverable_sats, serializer);
         <u64>::sse_encode(self.total_sats, serializer);
     }
 }
@@ -1122,7 +1151,7 @@ impl SseEncode for crate::api::ark_api::Transaction {
                 <u64>::sse_encode(amount_sats, serializer);
                 <Option<i64>>::sse_encode(confirmed_at, serializer);
             }
-            crate::api::ark_api::Transaction::Round {
+            crate::api::ark_api::Transaction::Commitment {
                 txid,
                 amount_sats,
                 created_at,
@@ -1139,6 +1168,18 @@ impl SseEncode for crate::api::ark_api::Transaction {
                 created_at,
             } => {
                 <i32>::sse_encode(2, serializer);
+                <String>::sse_encode(txid, serializer);
+                <u64>::sse_encode(amount_sats, serializer);
+                <bool>::sse_encode(is_settled, serializer);
+                <Option<i64>>::sse_encode(created_at, serializer);
+            }
+            crate::api::ark_api::Transaction::Ark {
+                txid,
+                amount_sats,
+                is_settled,
+                created_at,
+            } => {
+                <i32>::sse_encode(3, serializer);
                 <String>::sse_encode(txid, serializer);
                 <i64>::sse_encode(amount_sats, serializer);
                 <bool>::sse_encode(is_settled, serializer);

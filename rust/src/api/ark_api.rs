@@ -48,6 +48,7 @@ pub struct Balance {
 pub struct OffchainBalance {
     pub pending_sats: u64,
     pub confirmed_sats: u64,
+    pub recoverable_sats: u64,
     pub total_sats: u64,
 }
 
@@ -55,8 +56,9 @@ pub async fn balance() -> Result<Balance> {
     let balance = crate::ark::client::balance().await?;
     Ok(Balance {
         offchain: OffchainBalance {
-            pending_sats: balance.offchain.pending().to_sat(),
+            pending_sats: balance.offchain.pre_confirmed().to_sat(),
             confirmed_sats: balance.offchain.confirmed().to_sat(),
+            recoverable_sats: balance.offchain.recoverable().to_sat(),
             total_sats: balance.offchain.total().to_sat(),
         },
     })
@@ -87,12 +89,18 @@ pub enum Transaction {
         amount_sats: u64,
         confirmed_at: Option<i64>,
     },
-    Round {
+    Commitment {
         txid: String,
         amount_sats: i64,
         created_at: i64,
     },
     Redeem {
+        txid: String,
+        amount_sats: u64,
+        is_settled: bool,
+        created_at: Option<i64>,
+    },
+    Ark {
         txid: String,
         amount_sats: i64,
         is_settled: bool,
@@ -118,7 +126,7 @@ pub async fn tx_history() -> Result<Vec<Transaction>> {
                 txid,
                 amount,
                 created_at,
-            } => Transaction::Round {
+            } => Transaction::Commitment {
                 txid: txid.to_string(),
                 amount_sats: amount.to_sat(),
                 created_at,
@@ -128,11 +136,21 @@ pub async fn tx_history() -> Result<Vec<Transaction>> {
                 amount,
                 is_settled,
                 created_at,
-            } => Transaction::Redeem {
+            } => Transaction::Ark {
                 txid: txid.to_string(),
                 amount_sats: amount.to_sat(),
                 is_settled,
                 created_at,
+            },
+            ark_core::history::Transaction::Offboard {
+                commitment_txid,
+                amount,
+                confirmed_at,
+            } => Transaction::Redeem {
+                txid: commitment_txid.to_string(),
+                amount_sats: amount.to_sat(),
+                is_settled: true,
+                created_at: confirmed_at,
             },
         })
         .collect();

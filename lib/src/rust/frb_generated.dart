@@ -615,12 +615,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   OffchainBalance dco_decode_offchain_balance(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return OffchainBalance(
       pendingSats: dco_decode_u_64(arr[0]),
       confirmedSats: dco_decode_u_64(arr[1]),
-      totalSats: dco_decode_u_64(arr[2]),
+      recoverableSats: dco_decode_u_64(arr[2]),
+      totalSats: dco_decode_u_64(arr[3]),
     );
   }
 
@@ -641,13 +642,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           confirmedAt: dco_decode_opt_box_autoadd_i_64(raw[3]),
         );
       case 1:
-        return Transaction_Round(
+        return Transaction_Commitment(
           txid: dco_decode_String(raw[1]),
           amountSats: dco_decode_i_64(raw[2]),
           createdAt: dco_decode_i_64(raw[3]),
         );
       case 2:
         return Transaction_Redeem(
+          txid: dco_decode_String(raw[1]),
+          amountSats: dco_decode_u_64(raw[2]),
+          isSettled: dco_decode_bool(raw[3]),
+          createdAt: dco_decode_opt_box_autoadd_i_64(raw[4]),
+        );
+      case 3:
+        return Transaction_Ark(
           txid: dco_decode_String(raw[1]),
           amountSats: dco_decode_i_64(raw[2]),
           isSettled: dco_decode_bool(raw[3]),
@@ -784,10 +792,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_pendingSats = sse_decode_u_64(deserializer);
     var var_confirmedSats = sse_decode_u_64(deserializer);
+    var var_recoverableSats = sse_decode_u_64(deserializer);
     var var_totalSats = sse_decode_u_64(deserializer);
     return OffchainBalance(
         pendingSats: var_pendingSats,
         confirmedSats: var_confirmedSats,
+        recoverableSats: var_recoverableSats,
         totalSats: var_totalSats);
   }
 
@@ -820,16 +830,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_txid = sse_decode_String(deserializer);
         var var_amountSats = sse_decode_i_64(deserializer);
         var var_createdAt = sse_decode_i_64(deserializer);
-        return Transaction_Round(
+        return Transaction_Commitment(
             txid: var_txid,
             amountSats: var_amountSats,
             createdAt: var_createdAt);
       case 2:
         var var_txid = sse_decode_String(deserializer);
+        var var_amountSats = sse_decode_u_64(deserializer);
+        var var_isSettled = sse_decode_bool(deserializer);
+        var var_createdAt = sse_decode_opt_box_autoadd_i_64(deserializer);
+        return Transaction_Redeem(
+            txid: var_txid,
+            amountSats: var_amountSats,
+            isSettled: var_isSettled,
+            createdAt: var_createdAt);
+      case 3:
+        var var_txid = sse_decode_String(deserializer);
         var var_amountSats = sse_decode_i_64(deserializer);
         var var_isSettled = sse_decode_bool(deserializer);
         var var_createdAt = sse_decode_i_64(deserializer);
-        return Transaction_Redeem(
+        return Transaction_Ark(
             txid: var_txid,
             amountSats: var_amountSats,
             isSettled: var_isSettled,
@@ -964,6 +984,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(self.pendingSats, serializer);
     sse_encode_u_64(self.confirmedSats, serializer);
+    sse_encode_u_64(self.recoverableSats, serializer);
     sse_encode_u_64(self.totalSats, serializer);
   }
 
@@ -991,7 +1012,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_String(txid, serializer);
         sse_encode_u_64(amountSats, serializer);
         sse_encode_opt_box_autoadd_i_64(confirmedAt, serializer);
-      case Transaction_Round(
+      case Transaction_Commitment(
           txid: final txid,
           amountSats: final amountSats,
           createdAt: final createdAt
@@ -1007,6 +1028,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           createdAt: final createdAt
         ):
         sse_encode_i_32(2, serializer);
+        sse_encode_String(txid, serializer);
+        sse_encode_u_64(amountSats, serializer);
+        sse_encode_bool(isSettled, serializer);
+        sse_encode_opt_box_autoadd_i_64(createdAt, serializer);
+      case Transaction_Ark(
+          txid: final txid,
+          amountSats: final amountSats,
+          isSettled: final isSettled,
+          createdAt: final createdAt
+        ):
+        sse_encode_i_32(3, serializer);
         sse_encode_String(txid, serializer);
         sse_encode_i_64(amountSats, serializer);
         sse_encode_bool(isSettled, serializer);

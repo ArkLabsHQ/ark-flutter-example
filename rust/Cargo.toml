@@ -8,11 +8,11 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
-ark-bdk-wallet = { git = "https://github.com/ArkLabsHQ/ark-rs.git", rev = "f64b45" }
-ark-core = { git = "https://github.com/ArkLabsHQ/ark-rs.git", rev = "f64b45" }
-ark-client = { git = "https://github.com/ArkLabsHQ/ark-rs.git", rev = "f64b45", default-features = false, features = ["tls-webpki-roots"] }
+ark-bdk-wallet = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1" }
+ark-core = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1" }
+ark-client = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1", default-features = false, features = ["tls-webpki-roots", "sqlite"] }
 async-trait = "0.1"
-bitcoin = { version = "0.32.4", features = ["rand"] }
+bitcoin = { version = "0.32.8", features = ["rand"] }
 esplora-client = { version = "0.11.0", features = ["async-https-native"] }
 flutter_rust_bridge = { version = "=2.11.1", features = ["anyhow"] }
 futures = "0.3.31"

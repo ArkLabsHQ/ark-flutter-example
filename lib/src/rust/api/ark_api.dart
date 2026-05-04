@@ -139,17 +139,22 @@ class Info {
 class OffchainBalance {
   final BigInt pendingSats;
   final BigInt confirmedSats;
+  final BigInt recoverableSats;
   final BigInt totalSats;
 
   const OffchainBalance({
     required this.pendingSats,
     required this.confirmedSats,
+    required this.recoverableSats,
     required this.totalSats,
   });
 
   @override
   int get hashCode =>
-      pendingSats.hashCode ^ confirmedSats.hashCode ^ totalSats.hashCode;
+      pendingSats.hashCode ^
+      confirmedSats.hashCode ^
+      recoverableSats.hashCode ^
+      totalSats.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -158,6 +163,7 @@ class OffchainBalance {
           runtimeType == other.runtimeType &&
           pendingSats == other.pendingSats &&
           confirmedSats == other.confirmedSats &&
+          recoverableSats == other.recoverableSats &&
           totalSats == other.totalSats;
 }
 
@@ -170,15 +176,21 @@ sealed class Transaction with _$Transaction {
     required BigInt amountSats,
     PlatformInt64? confirmedAt,
   }) = Transaction_Boarding;
-  const factory Transaction.round({
+  const factory Transaction.commitment({
     required String txid,
     required PlatformInt64 amountSats,
     required PlatformInt64 createdAt,
-  }) = Transaction_Round;
+  }) = Transaction_Commitment;
   const factory Transaction.redeem({
+    required String txid,
+    required BigInt amountSats,
+    required bool isSettled,
+    PlatformInt64? createdAt,
+  }) = Transaction_Redeem;
+  const factory Transaction.ark({
     required String txid,
     required PlatformInt64 amountSats,
     required bool isSettled,
     required PlatformInt64 createdAt,
-  }) = Transaction_Redeem;
+  }) = Transaction_Ark;
 }
