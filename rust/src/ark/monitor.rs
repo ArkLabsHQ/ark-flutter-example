@@ -1,7 +1,5 @@
 use crate::api::ark_api::{InvoiceEvent, InvoiceEventStatus, PaymentEvent};
-use crate::state::{
-    ARK_CLIENT, INVOICE_STREAM_SINK, PAYMENT_STREAM_SINK, SWAP_STORAGE,
-};
+use crate::state::{ARK_CLIENT, INVOICE_STREAM_SINK, PAYMENT_STREAM_SINK, SWAP_STORAGE};
 use ark_client::swap_storage::SwapStorage;
 use ark_client::{ReverseSwapData, SwapStatus};
 use ark_core::server::SubscriptionResponse;
@@ -197,11 +195,7 @@ async fn address_monitor_loop() {
                     if event.new_vtxos.is_empty() {
                         continue;
                     }
-                    let total_sats: u64 = event
-                        .new_vtxos
-                        .iter()
-                        .map(|v| v.amount.to_sat())
-                        .sum();
+                    let total_sats: u64 = event.new_vtxos.iter().map(|v| v.amount.to_sat()).sum();
                     if total_sats == 0 {
                         continue;
                     }

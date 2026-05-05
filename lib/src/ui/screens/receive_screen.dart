@@ -438,9 +438,7 @@ class ReceiveScreenState extends State<ReceiveScreen> {
                             )
                           : const Icon(Icons.refresh, color: Colors.amber),
                       label: Text(
-                        _lightningInvoice == null
-                            ? 'Generate'
-                            : 'Regenerate',
+                        _lightningInvoice == null ? 'Generate' : 'Regenerate',
                         style: const TextStyle(color: Colors.amber),
                       ),
                       style: OutlinedButton.styleFrom(

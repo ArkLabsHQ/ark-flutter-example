@@ -113,13 +113,8 @@ class TransactionHistoryWidgetState extends State<TransactionHistoryWidget> {
         false,
         tx.confirmedAt,
       ),
-      commitment: (tx) => _buildTransactionDetailsItem(
-          "Commitment Transaction",
-          tx.txid,
-          tx.createdAt,
-          tx.amountSats,
-          true,
-          null),
+      commitment: (tx) => _buildTransactionDetailsItem("Commitment Transaction",
+          tx.txid, tx.createdAt, tx.amountSats, true, null),
       redeem: (tx) => _buildTransactionDetailsItem(
           "Redeem Transaction",
           tx.txid,

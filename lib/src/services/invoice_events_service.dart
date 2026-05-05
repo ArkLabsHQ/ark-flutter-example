@@ -50,8 +50,8 @@ class InvoiceEventsService {
     if (_paymentSub == null) {
       _paymentSub = paymentEvents().listen(
         (event) {
-          logger.i(
-              'Payment event: txid=${event.txid} sats=${event.amountSats}');
+          logger
+              .i('Payment event: txid=${event.txid} sats=${event.amountSats}');
           _paymentController.add(event);
         },
         onError: (e, st) {

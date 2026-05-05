@@ -38,7 +38,7 @@ pub fn read_seed_file(data_dir: &str) -> Result<Option<Xpriv>> {
     let sk_hex =
         fs::read_to_string(&seed_path).map_err(|e| anyhow!("Failed to read seed file: {}", e))?;
 
-    let xprv = Xpriv::from_str(&sk_hex.trim())
+    let xprv = Xpriv::from_str(sk_hex.trim())
         .map_err(|e| anyhow!("Failed to create xprv from seed file: {}", e))?;
 
     tracing::debug!(seed_path = ?seed_path, "Successfully read xprv from file");

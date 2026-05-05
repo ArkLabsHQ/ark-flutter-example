@@ -44,7 +44,8 @@ class DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     logger.i("Dashboard initialized with ASP ID: ${widget.aspId}");
     _fetchWalletData();
-    InvoiceEventsService.instance.walletRefresh.addListener(_onRefreshRequested);
+    InvoiceEventsService.instance.walletRefresh
+        .addListener(_onRefreshRequested);
   }
 
   void _onRefreshRequested() {
