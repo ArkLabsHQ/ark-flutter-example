@@ -8,6 +8,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'ark_api.freezed.dart';
 
+// These functions are ignored because they are not marked as `pub`: `from_swap`
+
 Future<bool> walletExists({required String dataDir}) =>
     RustLib.instance.api.crateApiArkApiWalletExists(dataDir: dataDir);
 
@@ -54,7 +56,20 @@ Future<String> restoreWallet(
 
 Future<Balance> balance() => RustLib.instance.api.crateApiArkApiBalance();
 
-Future<Addresses> address() => RustLib.instance.api.crateApiArkApiAddress();
+Future<Addresses> address({BigInt? amountSats}) =>
+    RustLib.instance.api.crateApiArkApiAddress(amountSats: amountSats);
+
+Future<String> lightningInvoice({required BigInt amountSats}) =>
+    RustLib.instance.api.crateApiArkApiLightningInvoice(amountSats: amountSats);
+
+/// Subscribe to lightning invoice payment events. Called once from Dart at app
+/// start. The sink stays bound until the next call (which replaces it).
+Stream<InvoiceEvent> invoiceEvents() =>
+    RustLib.instance.api.crateApiArkApiInvoiceEvents();
+
+/// Subscribe to incoming Ark address payments.
+Stream<PaymentEvent> paymentEvents() =>
+    RustLib.instance.api.crateApiArkApiPaymentEvents();
 
 Future<List<Transaction>> txHistory() =>
     RustLib.instance.api.crateApiArkApiTxHistory();
@@ -136,20 +151,60 @@ class Info {
           network == other.network;
 }
 
+class InvoiceEvent {
+  final String swapId;
+  final String bolt11;
+  final BigInt amountSats;
+  final InvoiceEventStatus status;
+
+  const InvoiceEvent({
+    required this.swapId,
+    required this.bolt11,
+    required this.amountSats,
+    required this.status,
+  });
+
+  @override
+  int get hashCode =>
+      swapId.hashCode ^ bolt11.hashCode ^ amountSats.hashCode ^ status.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is InvoiceEvent &&
+          runtimeType == other.runtimeType &&
+          swapId == other.swapId &&
+          bolt11 == other.bolt11 &&
+          amountSats == other.amountSats &&
+          status == other.status;
+}
+
+enum InvoiceEventStatus {
+  paid,
+  expired,
+  failed,
+  ;
+}
+
 class OffchainBalance {
   final BigInt pendingSats;
   final BigInt confirmedSats;
+  final BigInt recoverableSats;
   final BigInt totalSats;
 
   const OffchainBalance({
     required this.pendingSats,
     required this.confirmedSats,
+    required this.recoverableSats,
     required this.totalSats,
   });
 
   @override
   int get hashCode =>
-      pendingSats.hashCode ^ confirmedSats.hashCode ^ totalSats.hashCode;
+      pendingSats.hashCode ^
+      confirmedSats.hashCode ^
+      recoverableSats.hashCode ^
+      totalSats.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -158,7 +213,32 @@ class OffchainBalance {
           runtimeType == other.runtimeType &&
           pendingSats == other.pendingSats &&
           confirmedSats == other.confirmedSats &&
+          recoverableSats == other.recoverableSats &&
           totalSats == other.totalSats;
+}
+
+/// Emitted when a new VTXO lands on one of our offchain Ark addresses. Note:
+/// LN reverse-swap claims also create VTXOs, so each LN payment may produce
+/// both an [`InvoiceEvent`] and a [`PaymentEvent`].
+class PaymentEvent {
+  final String txid;
+  final BigInt amountSats;
+
+  const PaymentEvent({
+    required this.txid,
+    required this.amountSats,
+  });
+
+  @override
+  int get hashCode => txid.hashCode ^ amountSats.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PaymentEvent &&
+          runtimeType == other.runtimeType &&
+          txid == other.txid &&
+          amountSats == other.amountSats;
 }
 
 @freezed
@@ -170,15 +250,21 @@ sealed class Transaction with _$Transaction {
     required BigInt amountSats,
     PlatformInt64? confirmedAt,
   }) = Transaction_Boarding;
-  const factory Transaction.round({
+  const factory Transaction.commitment({
     required String txid,
     required PlatformInt64 amountSats,
     required PlatformInt64 createdAt,
-  }) = Transaction_Round;
+  }) = Transaction_Commitment;
   const factory Transaction.redeem({
+    required String txid,
+    required BigInt amountSats,
+    required bool isSettled,
+    PlatformInt64? createdAt,
+  }) = Transaction_Redeem;
+  const factory Transaction.ark({
     required String txid,
     required PlatformInt64 amountSats,
     required bool isSettled,
     required PlatformInt64 createdAt,
-  }) = Transaction_Redeem;
+  }) = Transaction_Ark;
 }

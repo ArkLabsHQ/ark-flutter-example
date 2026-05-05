@@ -1,4 +1,5 @@
 import 'package:ark_flutter/src/rust/api/ark_api.dart';
+import 'package:ark_flutter/src/services/invoice_events_service.dart';
 import 'package:ark_flutter/src/services/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ark_flutter/src/logger/logger.dart';
@@ -87,6 +88,8 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               boltzUrl: _boltzUrl!);
           logger.i("Received id $aspId");
 
+          InvoiceEventsService.instance.start();
+
           // Navigate to dashboard
           if (mounted) {
             Navigator.of(context).pushReplacement(
@@ -112,6 +115,8 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               server: _arkServerUrl!,
               boltzUrl: _boltzUrl!);
           logger.i("Received id $aspId");
+
+          InvoiceEventsService.instance.start();
 
           // Navigate to dashboard
           if (mounted) {

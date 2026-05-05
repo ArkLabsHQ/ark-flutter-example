@@ -2,8 +2,11 @@ use crate::ark::address_helper::{decode_bip21, is_ark_address, is_bip21, is_btc_
 use crate::state::ARK_CLIENT;
 use anyhow::Result;
 use anyhow::{anyhow, bail};
+use ark_client::swap_storage::SwapStorage;
 use ark_client::OffChainBalance;
+use ark_client::SwapAmount;
 use ark_core::history::Transaction;
+use ark_core::send::SendReceiver;
 use ark_core::server::Info;
 use ark_core::ArkAddress;
 use bitcoin::{Address, Amount, Txid};
@@ -129,8 +132,9 @@ pub async fn send(address: String, amount: Amount) -> Result<Txid> {
                         .map_err(|e| anyhow!("Failed sending onchain {e:#}"))?;
                     Ok(txid)
                 } else if let Some(address) = uri.ark_address {
+                    let receiver = SendReceiver::bitcoin(address, amount);
                     let txid = client
-                        .send_vtxo(address, amount)
+                        .send(vec![receiver])
                         .await
                         .map_err(|e| anyhow!("Failed sending offchain {e:#}"))?;
                     Ok(txid)
@@ -139,8 +143,9 @@ pub async fn send(address: String, amount: Amount) -> Result<Txid> {
                 }
             } else if is_ark_address(address.as_str()) {
                 let address = ArkAddress::decode(address.as_str())?;
+                let receiver = SendReceiver::bitcoin(address, amount);
                 let txid = client
-                    .send_vtxo(address, amount)
+                    .send(vec![receiver])
                     .await
                     .map_err(|e| anyhow!("Failed sending offchain {e:#}"))?;
                 Ok(txid)
@@ -148,13 +153,47 @@ pub async fn send(address: String, amount: Amount) -> Result<Txid> {
                 let address = Address::from_str(address.as_str())?;
                 let rng = &mut StdRng::from_entropy();
                 let txid = client
-                    .collaborative_redeem(rng, address.assume_checked(), amount, true)
+                    .collaborative_redeem(rng, address.assume_checked(), amount)
                     .await
                     .map_err(|e| anyhow!("Failed sending onchain {e:#}"))?;
                 Ok(txid)
             } else {
                 bail!("Address format not supported")
             }
+        }
+    }
+}
+
+pub async fn get_ln_invoice(amount_sats: u64) -> Result<String> {
+    let maybe_client = ARK_CLIENT.try_get();
+
+    match maybe_client {
+        None => bail!("Ark client not initialized"),
+        Some(client) => {
+            let client = {
+                let guard = client.read();
+                Arc::clone(&*guard)
+            };
+            let result = client
+                .get_ln_invoice(SwapAmount::Invoice(Amount::from_sat(amount_sats)), None)
+                .await
+                .map_err(|e| anyhow!("Failed creating LN invoice {e:#}"))?;
+
+            // Pull the freshly-persisted swap data and start monitoring it.
+            // The SDK persisted it inside `get_ln_invoice`, so we just look it up.
+            let swap_id = result.swap_id.clone();
+            if let Some(storage) = crate::state::SWAP_STORAGE.try_get() {
+                let storage = Arc::clone(&*storage.read());
+                match storage.get_reverse(&swap_id).await {
+                    Ok(Some(swap)) => crate::ark::monitor::watch(swap),
+                    Ok(None) => tracing::warn!(swap_id, "swap not found in storage after creation"),
+                    Err(e) => {
+                        tracing::warn!(error = %e, swap_id, "failed to fetch swap from storage")
+                    }
+                }
+            }
+
+            Ok(result.invoice.to_string())
         }
     }
 }
@@ -173,7 +212,7 @@ pub async fn settle() -> Result<()> {
             };
             let mut rng = StdRng::from_entropy();
             client
-                .settle(&mut rng, false)
+                .settle(&mut rng)
                 .await
                 .map_err(|e| anyhow!("Failed settling {e:#}"))?;
         }

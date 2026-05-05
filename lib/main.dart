@@ -1,7 +1,9 @@
 import 'package:ark_flutter/src/logger/logger.dart';
 import 'package:ark_flutter/src/rust/api.dart';
 import 'package:ark_flutter/src/rust/api/ark_api.dart';
+import 'package:ark_flutter/src/services/invoice_events_service.dart';
 import 'package:ark_flutter/src/services/settings_service.dart';
+import 'package:ark_flutter/src/ui/widgets/payment_notification_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:ark_flutter/src/rust/frb_generated.dart';
 import 'package:ark_flutter/src/ui/screens/onboarding_screen.dart';
@@ -65,6 +67,10 @@ Future<Widget> determineStartScreen() async {
           boltzUrl: boltzUrl);
       logger.i("Wallet setup complete, ID: $aspId");
 
+      // Start global LN invoice listener — must be after wallet setup since
+      // the Rust monitor needs the client to be initialized.
+      InvoiceEventsService.instance.start();
+
       // Return the dashboard screen with the ASP ID
       return DashboardScreen(aspId: aspId);
     } else {
@@ -102,11 +108,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Ark - Flutter - Sample',
+      navigatorKey: appNavigatorKey,
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.amber,
         scaffoldBackgroundColor: const Color(0xFF121212),
         useMaterial3: true,
+      ),
+      builder: (context, child) => Stack(
+        children: [
+          if (child != null) child,
+          const PaymentNotificationOverlay(),
+        ],
       ),
       home: startScreen,
     );

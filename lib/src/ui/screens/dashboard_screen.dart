@@ -1,3 +1,4 @@
+import 'package:ark_flutter/src/services/invoice_events_service.dart';
 import 'package:ark_flutter/src/ui/screens/transaction_history_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:ark_flutter/src/logger/logger.dart';
@@ -43,6 +44,20 @@ class DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     logger.i("Dashboard initialized with ASP ID: ${widget.aspId}");
     _fetchWalletData();
+    InvoiceEventsService.instance.walletRefresh
+        .addListener(_onRefreshRequested);
+  }
+
+  void _onRefreshRequested() {
+    if (!mounted) return;
+    _fetchWalletData();
+  }
+
+  @override
+  void dispose() {
+    InvoiceEventsService.instance.walletRefresh
+        .removeListener(_onRefreshRequested);
+    super.dispose();
   }
 
   Future<void> _fetchWalletData() async {

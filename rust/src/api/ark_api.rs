@@ -48,6 +48,7 @@ pub struct Balance {
 pub struct OffchainBalance {
     pub pending_sats: u64,
     pub confirmed_sats: u64,
+    pub recoverable_sats: u64,
     pub total_sats: u64,
 }
 
@@ -55,8 +56,9 @@ pub async fn balance() -> Result<Balance> {
     let balance = crate::ark::client::balance().await?;
     Ok(Balance {
         offchain: OffchainBalance {
-            pending_sats: balance.offchain.pending().to_sat(),
+            pending_sats: balance.offchain.pre_confirmed().to_sat(),
             confirmed_sats: balance.offchain.confirmed().to_sat(),
+            recoverable_sats: balance.offchain.recoverable().to_sat(),
             total_sats: balance.offchain.total().to_sat(),
         },
     })
@@ -68,17 +70,95 @@ pub struct Addresses {
     pub bip21: String,
 }
 
-pub fn address() -> Result<Addresses> {
+pub fn address(amount_sats: Option<u64>) -> Result<Addresses> {
     let addresses = crate::ark::client::address()?;
 
     let boarding = addresses.boarding.to_string();
     let offchain = addresses.offchain.encode();
-    let bip21 = format!("bitcoin:{boarding}?ark={offchain}");
+    let bip21 = match amount_sats {
+        Some(sats) if sats > 0 => {
+            let amount_btc = Amount::from_sat(sats).to_btc();
+            format!("bitcoin:{boarding}?amount={amount_btc:.8}&ark={offchain}")
+        }
+        _ => format!("bitcoin:{boarding}?ark={offchain}"),
+    };
     Ok(Addresses {
         boarding,
         offchain,
         bip21,
     })
+}
+
+pub async fn lightning_invoice(amount_sats: u64) -> Result<String> {
+    crate::ark::client::get_ln_invoice(amount_sats).await
+}
+
+pub enum InvoiceEventStatus {
+    Paid,
+    Expired,
+    Failed,
+}
+
+pub struct InvoiceEvent {
+    pub swap_id: String,
+    pub bolt11: String,
+    pub amount_sats: u64,
+    pub status: InvoiceEventStatus,
+}
+
+impl InvoiceEvent {
+    pub(crate) fn from_swap(
+        swap: &ark_client::ReverseSwapData,
+        status: InvoiceEventStatus,
+    ) -> Self {
+        Self {
+            swap_id: swap.id.clone(),
+            bolt11: swap.bolt11.clone(),
+            amount_sats: swap.amount.to_sat(),
+            status,
+        }
+    }
+}
+
+/// Subscribe to lightning invoice payment events. Called once from Dart at app
+/// start. The sink stays bound until the next call (which replaces it).
+pub fn invoice_events(sink: crate::frb_generated::StreamSink<InvoiceEvent>) -> Result<()> {
+    use crate::state::INVOICE_STREAM_SINK;
+    use parking_lot::RwLock;
+    use std::sync::Arc;
+
+    let sink = Arc::new(sink);
+    match INVOICE_STREAM_SINK.try_get() {
+        Some(s) => *s.write() = sink,
+        None => {
+            INVOICE_STREAM_SINK.set(RwLock::new(sink));
+        }
+    }
+    Ok(())
+}
+
+/// Emitted when a new VTXO lands on one of our offchain Ark addresses. Note:
+/// LN reverse-swap claims also create VTXOs, so each LN payment may produce
+/// both an [`InvoiceEvent`] and a [`PaymentEvent`].
+pub struct PaymentEvent {
+    pub txid: String,
+    pub amount_sats: u64,
+}
+
+/// Subscribe to incoming Ark address payments.
+pub fn payment_events(sink: crate::frb_generated::StreamSink<PaymentEvent>) -> Result<()> {
+    use crate::state::PAYMENT_STREAM_SINK;
+    use parking_lot::RwLock;
+    use std::sync::Arc;
+
+    let sink = Arc::new(sink);
+    match PAYMENT_STREAM_SINK.try_get() {
+        Some(s) => *s.write() = sink,
+        None => {
+            PAYMENT_STREAM_SINK.set(RwLock::new(sink));
+        }
+    }
+    Ok(())
 }
 
 pub enum Transaction {
@@ -87,12 +167,18 @@ pub enum Transaction {
         amount_sats: u64,
         confirmed_at: Option<i64>,
     },
-    Round {
+    Commitment {
         txid: String,
         amount_sats: i64,
         created_at: i64,
     },
     Redeem {
+        txid: String,
+        amount_sats: u64,
+        is_settled: bool,
+        created_at: Option<i64>,
+    },
+    Ark {
         txid: String,
         amount_sats: i64,
         is_settled: bool,
@@ -118,7 +204,7 @@ pub async fn tx_history() -> Result<Vec<Transaction>> {
                 txid,
                 amount,
                 created_at,
-            } => Transaction::Round {
+            } => Transaction::Commitment {
                 txid: txid.to_string(),
                 amount_sats: amount.to_sat(),
                 created_at,
@@ -128,11 +214,21 @@ pub async fn tx_history() -> Result<Vec<Transaction>> {
                 amount,
                 is_settled,
                 created_at,
-            } => Transaction::Redeem {
+            } => Transaction::Ark {
                 txid: txid.to_string(),
                 amount_sats: amount.to_sat(),
                 is_settled,
                 created_at,
+            },
+            ark_core::history::Transaction::Offboard {
+                commitment_txid,
+                amount,
+                confirmed_at,
+            } => Transaction::Redeem {
+                txid: commitment_txid.to_string(),
+                amount_sats: amount.to_sat(),
+                is_settled: true,
+                created_at: confirmed_at,
             },
         })
         .collect();

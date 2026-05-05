@@ -22,52 +22,65 @@ mixin _$Transaction {
   TResult when<TResult extends Object?>({
     required TResult Function(String txid, BigInt amountSats, int? confirmedAt)
         boarding,
-    required TResult Function(String txid, int amountSats, int createdAt) round,
+    required TResult Function(String txid, int amountSats, int createdAt)
+        commitment,
+    required TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)
+        redeem,
     required TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)
-        redeem,
+        ark,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult? Function(String txid, int amountSats, int createdAt)? round,
+    TResult? Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult? Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult? Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult Function(String txid, int amountSats, int createdAt)? round,
+    TResult Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Transaction_Boarding value) boarding,
-    required TResult Function(Transaction_Round value) round,
+    required TResult Function(Transaction_Commitment value) commitment,
     required TResult Function(Transaction_Redeem value) redeem,
+    required TResult Function(Transaction_Ark value) ark,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Transaction_Boarding value)? boarding,
-    TResult? Function(Transaction_Round value)? round,
+    TResult? Function(Transaction_Commitment value)? commitment,
     TResult? Function(Transaction_Redeem value)? redeem,
+    TResult? Function(Transaction_Ark value)? ark,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Transaction_Boarding value)? boarding,
-    TResult Function(Transaction_Round value)? round,
+    TResult Function(Transaction_Commitment value)? commitment,
     TResult Function(Transaction_Redeem value)? redeem,
+    TResult Function(Transaction_Ark value)? ark,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -208,10 +221,14 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   TResult when<TResult extends Object?>({
     required TResult Function(String txid, BigInt amountSats, int? confirmedAt)
         boarding,
-    required TResult Function(String txid, int amountSats, int createdAt) round,
+    required TResult Function(String txid, int amountSats, int createdAt)
+        commitment,
+    required TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)
+        redeem,
     required TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)
-        redeem,
+        ark,
   }) {
     return boarding(txid, amountSats, confirmedAt);
   }
@@ -221,10 +238,13 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult? Function(String txid, int amountSats, int createdAt)? round,
+    TResult? Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult? Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult? Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
   }) {
     return boarding?.call(txid, amountSats, confirmedAt);
   }
@@ -234,10 +254,13 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult Function(String txid, int amountSats, int createdAt)? round,
+    TResult Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
     required TResult orElse(),
   }) {
     if (boarding != null) {
@@ -250,8 +273,9 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Transaction_Boarding value) boarding,
-    required TResult Function(Transaction_Round value) round,
+    required TResult Function(Transaction_Commitment value) commitment,
     required TResult Function(Transaction_Redeem value) redeem,
+    required TResult Function(Transaction_Ark value) ark,
   }) {
     return boarding(this);
   }
@@ -260,8 +284,9 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Transaction_Boarding value)? boarding,
-    TResult? Function(Transaction_Round value)? round,
+    TResult? Function(Transaction_Commitment value)? commitment,
     TResult? Function(Transaction_Redeem value)? redeem,
+    TResult? Function(Transaction_Ark value)? ark,
   }) {
     return boarding?.call(this);
   }
@@ -270,8 +295,9 @@ class _$Transaction_BoardingImpl extends Transaction_Boarding {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Transaction_Boarding value)? boarding,
-    TResult Function(Transaction_Round value)? round,
+    TResult Function(Transaction_Commitment value)? commitment,
     TResult Function(Transaction_Redeem value)? redeem,
+    TResult Function(Transaction_Ark value)? ark,
     required TResult orElse(),
   }) {
     if (boarding != null) {
@@ -303,22 +329,24 @@ abstract class Transaction_Boarding extends Transaction {
 }
 
 /// @nodoc
-abstract class _$$Transaction_RoundImplCopyWith<$Res>
+abstract class _$$Transaction_CommitmentImplCopyWith<$Res>
     implements $TransactionCopyWith<$Res> {
-  factory _$$Transaction_RoundImplCopyWith(_$Transaction_RoundImpl value,
-          $Res Function(_$Transaction_RoundImpl) then) =
-      __$$Transaction_RoundImplCopyWithImpl<$Res>;
+  factory _$$Transaction_CommitmentImplCopyWith(
+          _$Transaction_CommitmentImpl value,
+          $Res Function(_$Transaction_CommitmentImpl) then) =
+      __$$Transaction_CommitmentImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String txid, int amountSats, int createdAt});
 }
 
 /// @nodoc
-class __$$Transaction_RoundImplCopyWithImpl<$Res>
-    extends _$TransactionCopyWithImpl<$Res, _$Transaction_RoundImpl>
-    implements _$$Transaction_RoundImplCopyWith<$Res> {
-  __$$Transaction_RoundImplCopyWithImpl(_$Transaction_RoundImpl _value,
-      $Res Function(_$Transaction_RoundImpl) _then)
+class __$$Transaction_CommitmentImplCopyWithImpl<$Res>
+    extends _$TransactionCopyWithImpl<$Res, _$Transaction_CommitmentImpl>
+    implements _$$Transaction_CommitmentImplCopyWith<$Res> {
+  __$$Transaction_CommitmentImplCopyWithImpl(
+      _$Transaction_CommitmentImpl _value,
+      $Res Function(_$Transaction_CommitmentImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of Transaction
@@ -330,7 +358,7 @@ class __$$Transaction_RoundImplCopyWithImpl<$Res>
     Object? amountSats = null,
     Object? createdAt = null,
   }) {
-    return _then(_$Transaction_RoundImpl(
+    return _then(_$Transaction_CommitmentImpl(
       txid: null == txid
           ? _value.txid
           : txid // ignore: cast_nullable_to_non_nullable
@@ -349,8 +377,8 @@ class __$$Transaction_RoundImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$Transaction_RoundImpl extends Transaction_Round {
-  const _$Transaction_RoundImpl(
+class _$Transaction_CommitmentImpl extends Transaction_Commitment {
+  const _$Transaction_CommitmentImpl(
       {required this.txid, required this.amountSats, required this.createdAt})
       : super._();
 
@@ -363,14 +391,14 @@ class _$Transaction_RoundImpl extends Transaction_Round {
 
   @override
   String toString() {
-    return 'Transaction.round(txid: $txid, amountSats: $amountSats, createdAt: $createdAt)';
+    return 'Transaction.commitment(txid: $txid, amountSats: $amountSats, createdAt: $createdAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$Transaction_RoundImpl &&
+            other is _$Transaction_CommitmentImpl &&
             (identical(other.txid, txid) || other.txid == txid) &&
             (identical(other.amountSats, amountSats) ||
                 other.amountSats == amountSats) &&
@@ -386,21 +414,25 @@ class _$Transaction_RoundImpl extends Transaction_Round {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$Transaction_RoundImplCopyWith<_$Transaction_RoundImpl> get copyWith =>
-      __$$Transaction_RoundImplCopyWithImpl<_$Transaction_RoundImpl>(
-          this, _$identity);
+  _$$Transaction_CommitmentImplCopyWith<_$Transaction_CommitmentImpl>
+      get copyWith => __$$Transaction_CommitmentImplCopyWithImpl<
+          _$Transaction_CommitmentImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String txid, BigInt amountSats, int? confirmedAt)
         boarding,
-    required TResult Function(String txid, int amountSats, int createdAt) round,
+    required TResult Function(String txid, int amountSats, int createdAt)
+        commitment,
+    required TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)
+        redeem,
     required TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)
-        redeem,
+        ark,
   }) {
-    return round(txid, amountSats, createdAt);
+    return commitment(txid, amountSats, createdAt);
   }
 
   @override
@@ -408,12 +440,15 @@ class _$Transaction_RoundImpl extends Transaction_Round {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult? Function(String txid, int amountSats, int createdAt)? round,
+    TResult? Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult? Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult? Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
   }) {
-    return round?.call(txid, amountSats, createdAt);
+    return commitment?.call(txid, amountSats, createdAt);
   }
 
   @override
@@ -421,14 +456,17 @@ class _$Transaction_RoundImpl extends Transaction_Round {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult Function(String txid, int amountSats, int createdAt)? round,
+    TResult Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
     required TResult orElse(),
   }) {
-    if (round != null) {
-      return round(txid, amountSats, createdAt);
+    if (commitment != null) {
+      return commitment(txid, amountSats, createdAt);
     }
     return orElse();
   }
@@ -437,43 +475,46 @@ class _$Transaction_RoundImpl extends Transaction_Round {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Transaction_Boarding value) boarding,
-    required TResult Function(Transaction_Round value) round,
+    required TResult Function(Transaction_Commitment value) commitment,
     required TResult Function(Transaction_Redeem value) redeem,
+    required TResult Function(Transaction_Ark value) ark,
   }) {
-    return round(this);
+    return commitment(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Transaction_Boarding value)? boarding,
-    TResult? Function(Transaction_Round value)? round,
+    TResult? Function(Transaction_Commitment value)? commitment,
     TResult? Function(Transaction_Redeem value)? redeem,
+    TResult? Function(Transaction_Ark value)? ark,
   }) {
-    return round?.call(this);
+    return commitment?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Transaction_Boarding value)? boarding,
-    TResult Function(Transaction_Round value)? round,
+    TResult Function(Transaction_Commitment value)? commitment,
     TResult Function(Transaction_Redeem value)? redeem,
+    TResult Function(Transaction_Ark value)? ark,
     required TResult orElse(),
   }) {
-    if (round != null) {
-      return round(this);
+    if (commitment != null) {
+      return commitment(this);
     }
     return orElse();
   }
 }
 
-abstract class Transaction_Round extends Transaction {
-  const factory Transaction_Round(
+abstract class Transaction_Commitment extends Transaction {
+  const factory Transaction_Commitment(
       {required final String txid,
       required final int amountSats,
-      required final int createdAt}) = _$Transaction_RoundImpl;
-  const Transaction_Round._() : super._();
+      required final int createdAt}) = _$Transaction_CommitmentImpl;
+  const Transaction_Commitment._() : super._();
 
   @override
   String get txid;
@@ -485,8 +526,8 @@ abstract class Transaction_Round extends Transaction {
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$Transaction_RoundImplCopyWith<_$Transaction_RoundImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$Transaction_CommitmentImplCopyWith<_$Transaction_CommitmentImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -497,7 +538,7 @@ abstract class _$$Transaction_RedeemImplCopyWith<$Res>
       __$$Transaction_RedeemImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String txid, int amountSats, bool isSettled, int createdAt});
+  $Res call({String txid, BigInt amountSats, bool isSettled, int? createdAt});
 }
 
 /// @nodoc
@@ -516,7 +557,7 @@ class __$$Transaction_RedeemImplCopyWithImpl<$Res>
     Object? txid = null,
     Object? amountSats = null,
     Object? isSettled = null,
-    Object? createdAt = null,
+    Object? createdAt = freezed,
   }) {
     return _then(_$Transaction_RedeemImpl(
       txid: null == txid
@@ -526,15 +567,15 @@ class __$$Transaction_RedeemImplCopyWithImpl<$Res>
       amountSats: null == amountSats
           ? _value.amountSats
           : amountSats // ignore: cast_nullable_to_non_nullable
-              as int,
+              as BigInt,
       isSettled: null == isSettled
           ? _value.isSettled
           : isSettled // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
     ));
   }
 }
@@ -546,17 +587,17 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
       {required this.txid,
       required this.amountSats,
       required this.isSettled,
-      required this.createdAt})
+      this.createdAt})
       : super._();
 
   @override
   final String txid;
   @override
-  final int amountSats;
+  final BigInt amountSats;
   @override
   final bool isSettled;
   @override
-  final int createdAt;
+  final int? createdAt;
 
   @override
   String toString() {
@@ -595,10 +636,14 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   TResult when<TResult extends Object?>({
     required TResult Function(String txid, BigInt amountSats, int? confirmedAt)
         boarding,
-    required TResult Function(String txid, int amountSats, int createdAt) round,
+    required TResult Function(String txid, int amountSats, int createdAt)
+        commitment,
+    required TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)
+        redeem,
     required TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)
-        redeem,
+        ark,
   }) {
     return redeem(txid, amountSats, isSettled, createdAt);
   }
@@ -608,10 +653,13 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult? Function(String txid, int amountSats, int createdAt)? round,
+    TResult? Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult? Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult? Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
   }) {
     return redeem?.call(txid, amountSats, isSettled, createdAt);
   }
@@ -621,10 +669,13 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String txid, BigInt amountSats, int? confirmedAt)?
         boarding,
-    TResult Function(String txid, int amountSats, int createdAt)? round,
+    TResult Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
     TResult Function(
             String txid, int amountSats, bool isSettled, int createdAt)?
-        redeem,
+        ark,
     required TResult orElse(),
   }) {
     if (redeem != null) {
@@ -637,8 +688,9 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Transaction_Boarding value) boarding,
-    required TResult Function(Transaction_Round value) round,
+    required TResult Function(Transaction_Commitment value) commitment,
     required TResult Function(Transaction_Redeem value) redeem,
+    required TResult Function(Transaction_Ark value) ark,
   }) {
     return redeem(this);
   }
@@ -647,8 +699,9 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Transaction_Boarding value)? boarding,
-    TResult? Function(Transaction_Round value)? round,
+    TResult? Function(Transaction_Commitment value)? commitment,
     TResult? Function(Transaction_Redeem value)? redeem,
+    TResult? Function(Transaction_Ark value)? ark,
   }) {
     return redeem?.call(this);
   }
@@ -657,8 +710,9 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Transaction_Boarding value)? boarding,
-    TResult Function(Transaction_Round value)? round,
+    TResult Function(Transaction_Commitment value)? commitment,
     TResult Function(Transaction_Redeem value)? redeem,
+    TResult Function(Transaction_Ark value)? ark,
     required TResult orElse(),
   }) {
     if (redeem != null) {
@@ -671,10 +725,225 @@ class _$Transaction_RedeemImpl extends Transaction_Redeem {
 abstract class Transaction_Redeem extends Transaction {
   const factory Transaction_Redeem(
       {required final String txid,
+      required final BigInt amountSats,
+      required final bool isSettled,
+      final int? createdAt}) = _$Transaction_RedeemImpl;
+  const Transaction_Redeem._() : super._();
+
+  @override
+  String get txid;
+  @override
+  BigInt get amountSats;
+  bool get isSettled;
+  int? get createdAt;
+
+  /// Create a copy of Transaction
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$Transaction_RedeemImplCopyWith<_$Transaction_RedeemImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$Transaction_ArkImplCopyWith<$Res>
+    implements $TransactionCopyWith<$Res> {
+  factory _$$Transaction_ArkImplCopyWith(_$Transaction_ArkImpl value,
+          $Res Function(_$Transaction_ArkImpl) then) =
+      __$$Transaction_ArkImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String txid, int amountSats, bool isSettled, int createdAt});
+}
+
+/// @nodoc
+class __$$Transaction_ArkImplCopyWithImpl<$Res>
+    extends _$TransactionCopyWithImpl<$Res, _$Transaction_ArkImpl>
+    implements _$$Transaction_ArkImplCopyWith<$Res> {
+  __$$Transaction_ArkImplCopyWithImpl(
+      _$Transaction_ArkImpl _value, $Res Function(_$Transaction_ArkImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of Transaction
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? txid = null,
+    Object? amountSats = null,
+    Object? isSettled = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_$Transaction_ArkImpl(
+      txid: null == txid
+          ? _value.txid
+          : txid // ignore: cast_nullable_to_non_nullable
+              as String,
+      amountSats: null == amountSats
+          ? _value.amountSats
+          : amountSats // ignore: cast_nullable_to_non_nullable
+              as int,
+      isSettled: null == isSettled
+          ? _value.isSettled
+          : isSettled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$Transaction_ArkImpl extends Transaction_Ark {
+  const _$Transaction_ArkImpl(
+      {required this.txid,
+      required this.amountSats,
+      required this.isSettled,
+      required this.createdAt})
+      : super._();
+
+  @override
+  final String txid;
+  @override
+  final int amountSats;
+  @override
+  final bool isSettled;
+  @override
+  final int createdAt;
+
+  @override
+  String toString() {
+    return 'Transaction.ark(txid: $txid, amountSats: $amountSats, isSettled: $isSettled, createdAt: $createdAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$Transaction_ArkImpl &&
+            (identical(other.txid, txid) || other.txid == txid) &&
+            (identical(other.amountSats, amountSats) ||
+                other.amountSats == amountSats) &&
+            (identical(other.isSettled, isSettled) ||
+                other.isSettled == isSettled) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, txid, amountSats, isSettled, createdAt);
+
+  /// Create a copy of Transaction
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$Transaction_ArkImplCopyWith<_$Transaction_ArkImpl> get copyWith =>
+      __$$Transaction_ArkImplCopyWithImpl<_$Transaction_ArkImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String txid, BigInt amountSats, int? confirmedAt)
+        boarding,
+    required TResult Function(String txid, int amountSats, int createdAt)
+        commitment,
+    required TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)
+        redeem,
+    required TResult Function(
+            String txid, int amountSats, bool isSettled, int createdAt)
+        ark,
+  }) {
+    return ark(txid, amountSats, isSettled, createdAt);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String txid, BigInt amountSats, int? confirmedAt)?
+        boarding,
+    TResult? Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult? Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
+    TResult? Function(
+            String txid, int amountSats, bool isSettled, int createdAt)?
+        ark,
+  }) {
+    return ark?.call(txid, amountSats, isSettled, createdAt);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String txid, BigInt amountSats, int? confirmedAt)?
+        boarding,
+    TResult Function(String txid, int amountSats, int createdAt)? commitment,
+    TResult Function(
+            String txid, BigInt amountSats, bool isSettled, int? createdAt)?
+        redeem,
+    TResult Function(
+            String txid, int amountSats, bool isSettled, int createdAt)?
+        ark,
+    required TResult orElse(),
+  }) {
+    if (ark != null) {
+      return ark(txid, amountSats, isSettled, createdAt);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Transaction_Boarding value) boarding,
+    required TResult Function(Transaction_Commitment value) commitment,
+    required TResult Function(Transaction_Redeem value) redeem,
+    required TResult Function(Transaction_Ark value) ark,
+  }) {
+    return ark(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Transaction_Boarding value)? boarding,
+    TResult? Function(Transaction_Commitment value)? commitment,
+    TResult? Function(Transaction_Redeem value)? redeem,
+    TResult? Function(Transaction_Ark value)? ark,
+  }) {
+    return ark?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Transaction_Boarding value)? boarding,
+    TResult Function(Transaction_Commitment value)? commitment,
+    TResult Function(Transaction_Redeem value)? redeem,
+    TResult Function(Transaction_Ark value)? ark,
+    required TResult orElse(),
+  }) {
+    if (ark != null) {
+      return ark(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class Transaction_Ark extends Transaction {
+  const factory Transaction_Ark(
+      {required final String txid,
       required final int amountSats,
       required final bool isSettled,
-      required final int createdAt}) = _$Transaction_RedeemImpl;
-  const Transaction_Redeem._() : super._();
+      required final int createdAt}) = _$Transaction_ArkImpl;
+  const Transaction_Ark._() : super._();
 
   @override
   String get txid;
@@ -687,6 +956,6 @@ abstract class Transaction_Redeem extends Transaction {
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$Transaction_RedeemImplCopyWith<_$Transaction_RedeemImpl> get copyWith =>
+  _$$Transaction_ArkImplCopyWith<_$Transaction_ArkImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
