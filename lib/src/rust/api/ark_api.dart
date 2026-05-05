@@ -60,6 +60,11 @@ Future<Addresses> address({BigInt? amountSats}) =>
 Future<String> lightningInvoice({required BigInt amountSats}) =>
     RustLib.instance.api.crateApiArkApiLightningInvoice(amountSats: amountSats);
 
+/// Subscribe to lightning invoice payment events. Called once from Dart at app
+/// start. The sink stays bound until the next call (which replaces it).
+Stream<InvoiceEvent> invoiceEvents() =>
+    RustLib.instance.api.crateApiArkApiInvoiceEvents();
+
 Future<List<Transaction>> txHistory() =>
     RustLib.instance.api.crateApiArkApiTxHistory();
 
@@ -138,6 +143,41 @@ class Info {
           runtimeType == other.runtimeType &&
           serverPk == other.serverPk &&
           network == other.network;
+}
+
+class InvoiceEvent {
+  final String swapId;
+  final String bolt11;
+  final BigInt amountSats;
+  final InvoiceEventStatus status;
+
+  const InvoiceEvent({
+    required this.swapId,
+    required this.bolt11,
+    required this.amountSats,
+    required this.status,
+  });
+
+  @override
+  int get hashCode =>
+      swapId.hashCode ^ bolt11.hashCode ^ amountSats.hashCode ^ status.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is InvoiceEvent &&
+          runtimeType == other.runtimeType &&
+          swapId == other.swapId &&
+          bolt11 == other.bolt11 &&
+          amountSats == other.amountSats &&
+          status == other.status;
+}
+
+enum InvoiceEventStatus {
+  paid,
+  expired,
+  failed,
+  ;
 }
 
 class OffchainBalance {

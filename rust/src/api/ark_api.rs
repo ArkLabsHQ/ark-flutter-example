@@ -93,6 +93,50 @@ pub async fn lightning_invoice(amount_sats: u64) -> Result<String> {
     crate::ark::client::get_ln_invoice(amount_sats).await
 }
 
+pub enum InvoiceEventStatus {
+    Paid,
+    Expired,
+    Failed,
+}
+
+pub struct InvoiceEvent {
+    pub swap_id: String,
+    pub bolt11: String,
+    pub amount_sats: u64,
+    pub status: InvoiceEventStatus,
+}
+
+impl InvoiceEvent {
+    pub(crate) fn from_swap(
+        swap: &ark_client::ReverseSwapData,
+        status: InvoiceEventStatus,
+    ) -> Self {
+        Self {
+            swap_id: swap.id.clone(),
+            bolt11: swap.bolt11.clone(),
+            amount_sats: swap.amount.to_sat(),
+            status,
+        }
+    }
+}
+
+/// Subscribe to lightning invoice payment events. Called once from Dart at app
+/// start. The sink stays bound until the next call (which replaces it).
+pub fn invoice_events(sink: crate::frb_generated::StreamSink<InvoiceEvent>) -> Result<()> {
+    use crate::state::INVOICE_STREAM_SINK;
+    use parking_lot::RwLock;
+    use std::sync::Arc;
+
+    let sink = Arc::new(sink);
+    match INVOICE_STREAM_SINK.try_get() {
+        Some(s) => *s.write() = sink,
+        None => {
+            INVOICE_STREAM_SINK.set(RwLock::new(sink));
+        }
+    }
+    Ok(())
+}
+
 pub enum Transaction {
     Boarding {
         txid: String,

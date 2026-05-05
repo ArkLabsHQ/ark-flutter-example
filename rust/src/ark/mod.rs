@@ -1,13 +1,14 @@
 mod address_helper;
 pub mod client;
 pub mod esplora;
+pub mod monitor;
 mod seed_file;
 pub mod storage;
 
 use crate::ark::esplora::EsploraClient;
 use crate::ark::seed_file::{read_seed_file, reset_wallet, write_seed_file};
 use crate::ark::storage::InMemoryDb;
-use crate::state::ARK_CLIENT;
+use crate::state::{ARK_CLIENT, SWAP_STORAGE};
 use anyhow::{anyhow, bail, Result};
 use ark_client::{Bip32KeyProvider, OfflineClient};
 use bitcoin::bip32::Xpriv;
@@ -138,7 +139,8 @@ pub async fn setup_client(
         .await
         .map_err(|e| anyhow!("Failed to connect to Esplora at '{}': {}", esplora_url, e))?;
 
-    let swap_storage = ark_client::swap_storage::SqliteSwapStorage::new(swap_storage_path).await?;
+    let swap_storage =
+        Arc::new(ark_client::swap_storage::SqliteSwapStorage::new(swap_storage_path).await?);
 
     tracing::info!("Connecting to Ark");
     let client = OfflineClient::<_, _, _, Bip32KeyProvider>::new_with_bip32(
@@ -148,7 +150,7 @@ pub async fn setup_client(
         Arc::new(esplora),
         wallet,
         server.clone(),
-        Arc::new(swap_storage),
+        Arc::clone(&swap_storage),
         boltz_url,
         Duration::from_secs(30),
         None,
@@ -161,6 +163,16 @@ pub async fn setup_client(
     let info = client.server_info.clone();
 
     ARK_CLIENT.set(RwLock::new(Arc::new(client)));
+
+    match SWAP_STORAGE.try_get() {
+        Some(s) => *s.write() = swap_storage,
+        None => {
+            SWAP_STORAGE.set(RwLock::new(swap_storage));
+        }
+    }
+
+    // Resume monitoring any pending invoices created in past sessions.
+    crate::ark::monitor::start_monitor().await;
 
     tracing::info!(server_pk = ?info.signer_pk, "Connected to server");
 

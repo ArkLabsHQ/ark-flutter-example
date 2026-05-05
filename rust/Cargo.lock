@@ -117,7 +117,6 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 [[package]]
 name = "ark-bdk-wallet"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "anyhow",
  "ark-client",
@@ -136,7 +135,6 @@ dependencies = [
 [[package]]
 name = "ark-client"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "ark-core",
  "ark-delegator",
@@ -175,7 +173,6 @@ dependencies = [
 [[package]]
 name = "ark-core"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "bech32",
  "bitcoin",
@@ -196,7 +193,6 @@ dependencies = [
 [[package]]
 name = "ark-delegator"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "ark-core",
  "bitcoin",
@@ -209,7 +205,6 @@ dependencies = [
 [[package]]
 name = "ark-fees"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "cel",
 ]
@@ -217,7 +212,6 @@ dependencies = [
 [[package]]
 name = "ark-grpc"
 version = "0.8.0"
-source = "git+https://github.com/arkade-os/rust-sdk.git?rev=3abb5df1#3abb5df17848079c72d01ba8f2569ef7fa8f85a8"
 dependencies = [
  "ark-core",
  "async-stream",
@@ -3007,6 +3001,7 @@ dependencies = [
  "rustls",
  "serde_json",
  "state",
+ "tokio",
  "tracing",
  "tracing-log",
  "tracing-subscriber",

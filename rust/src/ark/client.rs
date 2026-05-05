@@ -2,6 +2,7 @@ use crate::ark::address_helper::{decode_bip21, is_ark_address, is_bip21, is_btc_
 use crate::state::ARK_CLIENT;
 use anyhow::Result;
 use anyhow::{anyhow, bail};
+use ark_client::swap_storage::SwapStorage;
 use ark_client::OffChainBalance;
 use ark_client::SwapAmount;
 use ark_core::history::Transaction;
@@ -177,6 +178,21 @@ pub async fn get_ln_invoice(amount_sats: u64) -> Result<String> {
                 .get_ln_invoice(SwapAmount::Invoice(Amount::from_sat(amount_sats)), None)
                 .await
                 .map_err(|e| anyhow!("Failed creating LN invoice {e:#}"))?;
+
+            // Pull the freshly-persisted swap data and start monitoring it.
+            // The SDK persisted it inside `get_ln_invoice`, so we just look it up.
+            let swap_id = result.swap_id.clone();
+            if let Some(storage) = crate::state::SWAP_STORAGE.try_get() {
+                let storage = Arc::clone(&*storage.read());
+                match storage.get_reverse(&swap_id).await {
+                    Ok(Some(swap)) => crate::ark::monitor::watch(swap),
+                    Ok(None) => tracing::warn!(swap_id, "swap not found in storage after creation"),
+                    Err(e) => {
+                        tracing::warn!(error = %e, swap_id, "failed to fetch swap from storage")
+                    }
+                }
+            }
+
             Ok(result.invoice.to_string())
         }
     }
