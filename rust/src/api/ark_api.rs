@@ -70,17 +70,27 @@ pub struct Addresses {
     pub bip21: String,
 }
 
-pub fn address() -> Result<Addresses> {
+pub fn address(amount_sats: Option<u64>) -> Result<Addresses> {
     let addresses = crate::ark::client::address()?;
 
     let boarding = addresses.boarding.to_string();
     let offchain = addresses.offchain.encode();
-    let bip21 = format!("bitcoin:{boarding}?ark={offchain}");
+    let bip21 = match amount_sats {
+        Some(sats) if sats > 0 => {
+            let amount_btc = Amount::from_sat(sats).to_btc();
+            format!("bitcoin:{boarding}?amount={amount_btc:.8}&ark={offchain}")
+        }
+        _ => format!("bitcoin:{boarding}?ark={offchain}"),
+    };
     Ok(Addresses {
         boarding,
         offchain,
         bip21,
     })
+}
+
+pub async fn lightning_invoice(amount_sats: u64) -> Result<String> {
+    crate::ark::client::get_ln_invoice(amount_sats).await
 }
 
 pub enum Transaction {

@@ -3,6 +3,7 @@ use crate::state::ARK_CLIENT;
 use anyhow::Result;
 use anyhow::{anyhow, bail};
 use ark_client::OffChainBalance;
+use ark_client::SwapAmount;
 use ark_core::history::Transaction;
 use ark_core::send::SendReceiver;
 use ark_core::server::Info;
@@ -158,6 +159,25 @@ pub async fn send(address: String, amount: Amount) -> Result<Txid> {
             } else {
                 bail!("Address format not supported")
             }
+        }
+    }
+}
+
+pub async fn get_ln_invoice(amount_sats: u64) -> Result<String> {
+    let maybe_client = ARK_CLIENT.try_get();
+
+    match maybe_client {
+        None => bail!("Ark client not initialized"),
+        Some(client) => {
+            let client = {
+                let guard = client.read();
+                Arc::clone(&*guard)
+            };
+            let result = client
+                .get_ln_invoice(SwapAmount::Invoice(Amount::from_sat(amount_sats)), None)
+                .await
+                .map_err(|e| anyhow!("Failed creating LN invoice {e:#}"))?;
+            Ok(result.invoice.to_string())
         }
     }
 }

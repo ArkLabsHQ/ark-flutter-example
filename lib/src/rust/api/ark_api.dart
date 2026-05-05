@@ -54,7 +54,11 @@ Future<String> restoreWallet(
 
 Future<Balance> balance() => RustLib.instance.api.crateApiArkApiBalance();
 
-Future<Addresses> address() => RustLib.instance.api.crateApiArkApiAddress();
+Future<Addresses> address({BigInt? amountSats}) =>
+    RustLib.instance.api.crateApiArkApiAddress(amountSats: amountSats);
+
+Future<String> lightningInvoice({required BigInt amountSats}) =>
+    RustLib.instance.api.crateApiArkApiLightningInvoice(amountSats: amountSats);
 
 Future<List<Transaction>> txHistory() =>
     RustLib.instance.api.crateApiArkApiTxHistory();
