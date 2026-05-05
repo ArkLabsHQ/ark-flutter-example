@@ -31,6 +31,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<LogEntry> dco_decode_StreamSink_log_entry_Sse(dynamic raw);
 
   @protected
+  RustStreamSink<PaymentEvent> dco_decode_StreamSink_payment_event_Sse(
+      dynamic raw);
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -82,6 +86,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw);
 
   @protected
+  PaymentEvent dco_decode_payment_event(dynamic raw);
+
+  @protected
   Transaction dco_decode_transaction(dynamic raw);
 
   @protected
@@ -102,6 +109,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<LogEntry> sse_decode_StreamSink_log_entry_Sse(
+      SseDeserializer deserializer);
+
+  @protected
+  RustStreamSink<PaymentEvent> sse_decode_StreamSink_payment_event_Sse(
       SseDeserializer deserializer);
 
   @protected
@@ -157,6 +168,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer);
 
   @protected
+  PaymentEvent sse_decode_payment_event(SseDeserializer deserializer);
+
+  @protected
   Transaction sse_decode_transaction(SseDeserializer deserializer);
 
   @protected
@@ -179,6 +193,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_StreamSink_log_entry_Sse(
       RustStreamSink<LogEntry> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_StreamSink_payment_event_Sse(
+      RustStreamSink<PaymentEvent> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -236,6 +254,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_payment_event(PaymentEvent self, SseSerializer serializer);
 
   @protected
   void sse_encode_transaction(Transaction self, SseSerializer serializer);

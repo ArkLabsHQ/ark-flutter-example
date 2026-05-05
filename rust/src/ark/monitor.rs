@@ -1,9 +1,13 @@
-use crate::api::ark_api::{InvoiceEvent, InvoiceEventStatus};
-use crate::state::{ARK_CLIENT, INVOICE_STREAM_SINK, SWAP_STORAGE};
+use crate::api::ark_api::{InvoiceEvent, InvoiceEventStatus, PaymentEvent};
+use crate::state::{
+    ARK_CLIENT, INVOICE_STREAM_SINK, PAYMENT_STREAM_SINK, SWAP_STORAGE,
+};
 use ark_client::swap_storage::SwapStorage;
 use ark_client::{ReverseSwapData, SwapStatus};
+use ark_core::server::SubscriptionResponse;
+use futures::StreamExt;
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const DEFAULT_INVOICE_EXPIRY_SECS: u64 = 3600;
 
@@ -110,5 +114,116 @@ fn emit(event: InvoiceEvent) {
     let sink = sink.read().clone();
     if let Err(e) = sink.add(event) {
         tracing::warn!(error = ?e, "Failed to push invoice event to sink");
+    }
+}
+
+fn emit_payment(event: PaymentEvent) {
+    let Some(sink) = PAYMENT_STREAM_SINK.try_get() else {
+        return;
+    };
+    let sink = sink.read().clone();
+    if let Err(e) = sink.add(event) {
+        tracing::warn!(error = ?e, "Failed to push payment event to sink");
+    }
+}
+
+/// Subscribe to the wallet's offchain Ark addresses and emit a [`PaymentEvent`]
+/// for each new VTXO that lands. Spawns a background task with reconnection
+/// backoff. Called once after wallet load.
+pub async fn start_address_monitor() {
+    tokio::spawn(address_monitor_loop());
+}
+
+async fn address_monitor_loop() {
+    const INITIAL_BACKOFF: Duration = Duration::from_secs(1);
+    const MAX_BACKOFF: Duration = Duration::from_secs(30);
+    let mut backoff = INITIAL_BACKOFF;
+
+    loop {
+        let client = match ARK_CLIENT.try_get() {
+            Some(c) => Arc::clone(&*c.read()),
+            None => {
+                tracing::warn!("address monitor: client not initialized");
+                tokio::time::sleep(backoff).await;
+                backoff = (backoff * 2).min(MAX_BACKOFF);
+                continue;
+            }
+        };
+
+        let addresses = match client.get_offchain_addresses() {
+            Ok(a) => a,
+            Err(e) => {
+                tracing::warn!(error = %e, "address monitor: failed to get offchain addresses");
+                tokio::time::sleep(backoff).await;
+                backoff = (backoff * 2).min(MAX_BACKOFF);
+                continue;
+            }
+        };
+
+        if addresses.is_empty() {
+            tokio::time::sleep(backoff).await;
+            continue;
+        }
+
+        let scripts = addresses.iter().map(|(addr, _)| *addr).collect::<Vec<_>>();
+
+        let subscription_id = match client.subscribe_to_scripts(scripts, None).await {
+            Ok(id) => id,
+            Err(e) => {
+                tracing::warn!(error = %e, "address monitor: subscribe_to_scripts failed");
+                tokio::time::sleep(backoff).await;
+                backoff = (backoff * 2).min(MAX_BACKOFF);
+                continue;
+            }
+        };
+
+        let mut stream = match client.get_subscription(subscription_id.clone()).await {
+            Ok(s) => s,
+            Err(e) => {
+                tracing::warn!(error = %e, "address monitor: get_subscription failed");
+                tokio::time::sleep(backoff).await;
+                backoff = (backoff * 2).min(MAX_BACKOFF);
+                continue;
+            }
+        };
+
+        tracing::info!("Address monitor connected");
+        backoff = INITIAL_BACKOFF;
+
+        while let Some(item) = stream.next().await {
+            match item {
+                Ok(SubscriptionResponse::Heartbeat) => {}
+                Ok(SubscriptionResponse::Event(event)) => {
+                    if event.new_vtxos.is_empty() {
+                        continue;
+                    }
+                    let total_sats: u64 = event
+                        .new_vtxos
+                        .iter()
+                        .map(|v| v.amount.to_sat())
+                        .sum();
+                    if total_sats == 0 {
+                        continue;
+                    }
+                    tracing::info!(
+                        txid = %event.txid,
+                        amount_sats = total_sats,
+                        "Address received new VTXO(s)"
+                    );
+                    emit_payment(PaymentEvent {
+                        txid: event.txid.to_string(),
+                        amount_sats: total_sats,
+                    });
+                }
+                Err(e) => {
+                    tracing::warn!(error = %e, "address subscription stream error");
+                    break;
+                }
+            }
+        }
+
+        tracing::info!("Address monitor stream ended; reconnecting");
+        tokio::time::sleep(backoff).await;
+        backoff = (backoff * 2).min(MAX_BACKOFF);
     }
 }

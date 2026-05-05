@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 2012085745;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1974946055;
 
 // Section: executor
 
@@ -380,6 +380,44 @@ fn wire__crate__api__ark_api__nsec_impl(
         },
     )
 }
+fn wire__crate__api__ark_api__payment_events_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "payment_events",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_sink = <StreamSink<
+                crate::api::ark_api::PaymentEvent,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::ark_api::payment_events(api_sink)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__ark_api__reset_wallet_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -687,6 +725,16 @@ impl SseDecode
     }
 }
 
+impl SseDecode
+    for StreamSink<crate::api::ark_api::PaymentEvent, flutter_rust_bridge::for_generated::SseCodec>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
+    }
+}
+
 impl SseDecode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -865,6 +913,18 @@ impl SseDecode for Option<u64> {
     }
 }
 
+impl SseDecode for crate::api::ark_api::PaymentEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_txid = <String>::sse_decode(deserializer);
+        let mut var_amountSats = <u64>::sse_decode(deserializer);
+        return crate::api::ark_api::PaymentEvent {
+            txid: var_txid,
+            amount_sats: var_amountSats,
+        };
+    }
+}
+
 impl SseDecode for crate::api::ark_api::Transaction {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -960,13 +1020,14 @@ fn pde_ffi_dispatcher_primary_impl(
             wire__crate__api__ark_api__load_existing_wallet_impl(port, ptr, rust_vec_len, data_len)
         }
         9 => wire__crate__api__ark_api__nsec_impl(port, ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__ark_api__reset_wallet_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__ark_api__restore_wallet_impl(port, ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__ark_api__send_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__ark_api__settle_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__ark_api__setup_new_wallet_impl(port, ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__ark_api__tx_history_impl(port, ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__ark_api__wallet_exists_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__ark_api__payment_events_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__ark_api__reset_wallet_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__ark_api__restore_wallet_impl(port, ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__ark_api__send_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__ark_api__settle_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__ark_api__setup_new_wallet_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__ark_api__tx_history_impl(port, ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__ark_api__wallet_exists_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1127,6 +1188,27 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::ark_api::OffchainBalance>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::ark_api::PaymentEvent {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.txid.into_into_dart().into_dart(),
+            self.amount_sats.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::ark_api::PaymentEvent
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::ark_api::PaymentEvent>
+    for crate::api::ark_api::PaymentEvent
+{
+    fn into_into_dart(self) -> crate::api::ark_api::PaymentEvent {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::ark_api::Transaction {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -1214,6 +1296,15 @@ impl SseEncode
 
 impl SseEncode
     for StreamSink<crate::logger::LogEntry, flutter_rust_bridge::for_generated::SseCodec>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
+    }
+}
+
+impl SseEncode
+    for StreamSink<crate::api::ark_api::PaymentEvent, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1360,6 +1451,14 @@ impl SseEncode for Option<u64> {
         if let Some(value) = self {
             <u64>::sse_encode(value, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::api::ark_api::PaymentEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.txid, serializer);
+        <u64>::sse_encode(self.amount_sats, serializer);
     }
 }
 

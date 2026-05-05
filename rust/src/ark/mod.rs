@@ -174,6 +174,9 @@ pub async fn setup_client(
     // Resume monitoring any pending invoices created in past sessions.
     crate::ark::monitor::start_monitor().await;
 
+    // Subscribe to incoming payments on offchain Ark addresses.
+    crate::ark::monitor::start_address_monitor().await;
+
     tracing::info!(server_pk = ?info.signer_pk, "Connected to server");
 
     Ok(info.signer_pk.to_string())

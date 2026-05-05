@@ -8,9 +8,9 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
-ark-bdk-wallet = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1" }
-ark-core = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1" }
-ark-client = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "3abb5df1", default-features = false, features = ["tls-webpki-roots", "sqlite"] }
+ark-bdk-wallet = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "16c05893" }
+ark-core = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "16c05893" }
+ark-client = { git = "https://github.com/arkade-os/rust-sdk.git", rev = "16c05893", default-features = false, features = ["tls-webpki-roots", "sqlite"] }
 async-trait = "0.1"
 bitcoin = { version = "0.32.8", features = ["rand"] }
 esplora-client = { version = "0.11.0", features = ["async-https-native"] }

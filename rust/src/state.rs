@@ -1,4 +1,4 @@
-use crate::api::ark_api::InvoiceEvent;
+use crate::api::ark_api::{InvoiceEvent, PaymentEvent};
 use crate::ark::esplora::EsploraClient;
 use crate::ark::storage::InMemoryDb;
 use crate::frb_generated::StreamSink;
@@ -17,3 +17,4 @@ pub static ARK_CLIENT: InitCell<
 > = InitCell::new();
 pub static SWAP_STORAGE: InitCell<RwLock<Arc<SqliteSwapStorage>>> = InitCell::new();
 pub static INVOICE_STREAM_SINK: InitCell<RwLock<Arc<StreamSink<InvoiceEvent>>>> = InitCell::new();
+pub static PAYMENT_STREAM_SINK: InitCell<RwLock<Arc<StreamSink<PaymentEvent>>>> = InitCell::new();

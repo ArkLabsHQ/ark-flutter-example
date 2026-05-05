@@ -20,8 +20,9 @@ class PaymentNotificationOverlay extends StatefulWidget {
 class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
     with TickerProviderStateMixin {
   StreamSubscription<InvoiceEvent>? _sub;
-  final Queue<InvoiceEvent> _queue = Queue<InvoiceEvent>();
-  InvoiceEvent? _current;
+  StreamSubscription<PaymentEvent>? _paymentSub;
+  final Queue<_NotificationItem> _queue = Queue<_NotificationItem>();
+  _NotificationItem? _current;
 
   late final AnimationController _enter = AnimationController(
     vsync: this,
@@ -43,12 +44,22 @@ class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
   @override
   void initState() {
     super.initState();
-    _sub = InvoiceEventsService.instance.stream.listen(_onEvent);
+    _sub = InvoiceEventsService.instance.stream.listen(_onInvoice);
+    _paymentSub =
+        InvoiceEventsService.instance.paymentStream.listen(_onPayment);
   }
 
-  void _onEvent(InvoiceEvent event) {
+  void _onInvoice(InvoiceEvent event) {
     if (event.status != InvoiceEventStatus.paid) return;
-    _queue.add(event);
+    _enqueue(_NotificationItem.lightning(event.amountSats));
+  }
+
+  void _onPayment(PaymentEvent event) {
+    _enqueue(_NotificationItem.ark(event.amountSats));
+  }
+
+  void _enqueue(_NotificationItem item) {
+    _queue.add(item);
     if (_current == null) _showNext();
   }
 
@@ -80,6 +91,7 @@ class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
   @override
   void dispose() {
     _sub?.cancel();
+    _paymentSub?.cancel();
     _enter.dispose();
     _glow.dispose();
     super.dispose();
@@ -87,8 +99,8 @@ class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final event = _current;
-    if (event == null) return const SizedBox.shrink();
+    final item = _current;
+    if (item == null) return const SizedBox.shrink();
 
     return Positioned.fill(
       child: FadeTransition(
@@ -107,7 +119,7 @@ class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
               child: ScaleTransition(
                 scale: _scale,
                 child: _Card(
-                  event: event,
+                  item: item,
                   glow: _glow,
                   onClose: _close,
                   onHome: _goHome,
@@ -121,15 +133,40 @@ class _PaymentNotificationOverlayState extends State<PaymentNotificationOverlay>
   }
 }
 
+enum _NotificationKind { lightning, ark }
+
+class _NotificationItem {
+  final BigInt amountSats;
+  final _NotificationKind kind;
+
+  const _NotificationItem(this.amountSats, this.kind);
+
+  factory _NotificationItem.lightning(BigInt sats) =>
+      _NotificationItem(sats, _NotificationKind.lightning);
+
+  factory _NotificationItem.ark(BigInt sats) =>
+      _NotificationItem(sats, _NotificationKind.ark);
+
+  String get sourceLabel => switch (kind) {
+        _NotificationKind.lightning => 'via Lightning',
+        _NotificationKind.ark => 'via Arkade',
+      };
+
+  IconData get icon => switch (kind) {
+        _NotificationKind.lightning => Icons.bolt,
+        _NotificationKind.ark => Icons.account_balance_wallet,
+      };
+}
+
 class _Card extends StatelessWidget {
   const _Card({
-    required this.event,
+    required this.item,
     required this.glow,
     required this.onClose,
     required this.onHome,
   });
 
-  final InvoiceEvent event;
+  final _NotificationItem item;
   final Animation<double> glow;
   final VoidCallback onClose;
   final VoidCallback onHome;
@@ -172,7 +209,7 @@ class _Card extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PulsingIcon(glow: glow),
+                _PulsingIcon(glow: glow, icon: item.icon),
                 const SizedBox(height: 20),
                 const Text(
                   'Payment received',
@@ -197,7 +234,7 @@ class _Card extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: _formatSats(event.amountSats),
+                        text: _formatSats(item.amountSats),
                         style: const TextStyle(
                           color: Colors.amber,
                           fontSize: 38,
@@ -214,6 +251,14 @@ class _Card extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  item.sourceLabel,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -276,8 +321,10 @@ class _Card extends StatelessWidget {
 }
 
 class _PulsingIcon extends StatelessWidget {
-  const _PulsingIcon({required this.glow});
+  const _PulsingIcon({required this.glow, required this.icon});
+
   final Animation<double> glow;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +356,7 @@ class _PulsingIcon extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: const Icon(Icons.bolt, color: Colors.amber, size: 36),
+              child: Icon(icon, color: Colors.amber, size: 36),
             ),
           ),
         );

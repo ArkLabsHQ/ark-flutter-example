@@ -8,6 +8,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'ark_api.freezed.dart';
 
+// These functions are ignored because they are not marked as `pub`: `from_swap`
+
 Future<bool> walletExists({required String dataDir}) =>
     RustLib.instance.api.crateApiArkApiWalletExists(dataDir: dataDir);
 
@@ -64,6 +66,10 @@ Future<String> lightningInvoice({required BigInt amountSats}) =>
 /// start. The sink stays bound until the next call (which replaces it).
 Stream<InvoiceEvent> invoiceEvents() =>
     RustLib.instance.api.crateApiArkApiInvoiceEvents();
+
+/// Subscribe to incoming Ark address payments.
+Stream<PaymentEvent> paymentEvents() =>
+    RustLib.instance.api.crateApiArkApiPaymentEvents();
 
 Future<List<Transaction>> txHistory() =>
     RustLib.instance.api.crateApiArkApiTxHistory();
@@ -209,6 +215,30 @@ class OffchainBalance {
           confirmedSats == other.confirmedSats &&
           recoverableSats == other.recoverableSats &&
           totalSats == other.totalSats;
+}
+
+/// Emitted when a new VTXO lands on one of our offchain Ark addresses. Note:
+/// LN reverse-swap claims also create VTXOs, so each LN payment may produce
+/// both an [`InvoiceEvent`] and a [`PaymentEvent`].
+class PaymentEvent {
+  final String txid;
+  final BigInt amountSats;
+
+  const PaymentEvent({
+    required this.txid,
+    required this.amountSats,
+  });
+
+  @override
+  int get hashCode => txid.hashCode ^ amountSats.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PaymentEvent &&
+          runtimeType == other.runtimeType &&
+          txid == other.txid &&
+          amountSats == other.amountSats;
 }
 
 @freezed

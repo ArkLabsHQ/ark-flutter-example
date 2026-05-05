@@ -137,6 +137,30 @@ pub fn invoice_events(sink: crate::frb_generated::StreamSink<InvoiceEvent>) -> R
     Ok(())
 }
 
+/// Emitted when a new VTXO lands on one of our offchain Ark addresses. Note:
+/// LN reverse-swap claims also create VTXOs, so each LN payment may produce
+/// both an [`InvoiceEvent`] and a [`PaymentEvent`].
+pub struct PaymentEvent {
+    pub txid: String,
+    pub amount_sats: u64,
+}
+
+/// Subscribe to incoming Ark address payments.
+pub fn payment_events(sink: crate::frb_generated::StreamSink<PaymentEvent>) -> Result<()> {
+    use crate::state::PAYMENT_STREAM_SINK;
+    use parking_lot::RwLock;
+    use std::sync::Arc;
+
+    let sink = Arc::new(sink);
+    match PAYMENT_STREAM_SINK.try_get() {
+        Some(s) => *s.write() = sink,
+        None => {
+            PAYMENT_STREAM_SINK.set(RwLock::new(sink));
+        }
+    }
+    Ok(())
+}
+
 pub enum Transaction {
     Boarding {
         txid: String,
